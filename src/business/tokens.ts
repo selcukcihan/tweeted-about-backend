@@ -31,6 +31,7 @@ export class Tokens {
         authorization: "Bearer " + tokenResponse.data.access_token,
       },
     })
+    console.log(`AUTH0 tokens: ${JSON.stringify(userResponse.data, null, 2)}`)
     return {
       accessToken: userResponse.data.identities[0].access_token as string,
       accessSecret: userResponse.data.identities[0].access_token_secret as string,

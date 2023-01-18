@@ -26,7 +26,7 @@ export class Crawler {
       paginationToken = page.meta.next_token
       if (page.data.length > 0) {
         tweets.push(...page.data.map(d => ({
-          context: (d.context_annotations || []).map(c => c.entity.name.toLowerCase()),
+          context: (d.context_annotations || []).map(c => c.entity.name),
         })))
       }
 
@@ -38,12 +38,14 @@ export class Crawler {
     const topics = tweets
       .reduce((acc, cur) => (acc.concat(cur.context)), [] as string[])
       .reduce((acc, cur) => (acc.set(cur, (acc.get(cur) || 0) + 1)), new Map<string, number>())
+    const response = Object.fromEntries(topics)
     await this.s3Client.send(new PutObjectCommand({
-      Body: JSON.stringify(topics),
+      Body: JSON.stringify(response),
       Key: `user/${twitterUserId}/topics.json`,
       Bucket: this.s3Bucket,
       ACL: 'public-read',
     }))
     console.log(`Stored ${topics.size} topics for ${twitterUserId}`)
+    return response
   }
 }
